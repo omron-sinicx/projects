@@ -1,0 +1,25 @@
+---
+// The "X" of the SINIC X logo, cropped from the wordmark. Sized by font-size.
+import logo from '../assets/sinicx-logo.png';
+---
+
+<span aria-hidden="true" class="xmark">
+  <img src={logo.src} alt="" width={logo.width} height={logo.height} loading="lazy" decoding="async" />
+</span>
+
+<style>
+  .xmark {
+    display: block;
+    width: 1.06em;
+    height: 1em;
+    overflow: hidden;
+  }
+  img {
+    display: block;
+    width: auto;
+    max-width: none;
+    height: 1em;
+    margin-left: -5.075em;
+    filter: var(--xmark-filter);
+  }
+</style>

@@ -1,0 +1,158 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import XMark from './XMark.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  /**
+   * Section the card is listed under (area or theme id). A project can appear in several sections of one
+   * page, and view-transition names must be unique, so the name is per section: the same card in the same
+   * section morphs between pages.
+   */
+  scope: string;
+}
+
+const { project, scope } = Astro.props;
+// `arxiv` / `code` are still collected but not shown: many pages only have a code link (see the links block below).
+const { url, title, description, image, imageWidth, imageHeight, venue } = project.data;
+// No known venue (or one marked as a preprint) → a gray "Preprint" label instead of the accent one.
+const preprint = !venue || /preprint|arxiv/i.test(venue);
+const label = venue && !/^preprint$/i.test(venue) ? venue : 'Preprint';
+
+// "👏CLAP: Direct VLM-to-VLA …" → name "CLAP", headline "Direct VLM-to-VLA …"
+const split = title.match(/^(.{1,40}?):\s+(.+)$/);
+const name = project.data.shortName ?? (split ? split[1] : project.id).replace(/^[^\p{L}\p{N}]+/u, '');
+const headline = split ? split[2] : title;
+// `image` is the project's own teaser URL, hot-linked as-is; no image → the X-mark placeholder.
+// Teasers near the card's 2:1 fill it; taller or wider figures are shown whole on white rather than cropped.
+const ratio = imageWidth && imageHeight ? imageWidth / imageHeight : 2;
+const fit = ratio > 1.6 && ratio < 2.6 ? 'object-cover' : 'object-contain';
+---
+
+<article
+  class="card @container"
+  data-id={project.id}
+  data-name={name}
+  style={`view-transition-name: c-${scope}-${project.id.replace(/[^\w-]/g, '_')}`}
+>
+  <a class="card-link group" href={url}>
+    <div class="teaser-frame overflow-hidden rounded-card bg-thumb">
+      {
+        image ? (
+          <img
+            class:list={['teaser teaser-img aspect-[2/1] w-full bg-teaser', fit]}
+            src={image}
+            alt=""
+            width={imageWidth}
+            height={imageHeight}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div class="teaser grid aspect-[2/1] place-items-center text-[40px]">
+            <XMark />
+          </div>
+        )
+      }
+    </div>
+    <div class="card-text mt-2.5 flex flex-col gap-1.5">
+      <div class="flex min-w-0 items-center gap-1.5 text-meta">
+        <span class="min-w-0 truncate font-bold">{name}</span>
+        <span class:list={['venue max-w-full shrink-0 truncate', preprint && 'preprint']}>{label}</span>
+      </div>
+      <h3 class="ttl line-clamp-3 text-card-title leading-snug font-semibold">{headline}</h3>
+      {
+        description && (
+          <p class="desc hidden text-card-desc leading-relaxed text-body @[20rem]:line-clamp-3">
+            {description}
+          </p>
+        )
+      }
+    </div>
+  </a>
+  {
+    /* arXiv / Code links, hidden for now (many pages only have a code link).
+       To restore: re-add `arxiv, code` to the destructuring above and the `.card-links` styles below.
+  <nav class="card-links mt-2 flex gap-3 text-meta font-semibold" aria-label={`${name} links`}>
+    {arxiv && <a href={arxiv}>arXiv</a>}
+    <a href={code}>Code</a>
+  </nav>
+    */
+  }
+</article>
+
+<style>
+  .card-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .teaser {
+    transition:
+      transform 0.35s var(--ease-expand),
+      opacity 0.4s ease-out;
+  }
+  /* Loading: with JS (images.ts marks each teaser once it has loaded) the frame shimmers and the
+     image fades in. Without JS images simply appear. */
+  .teaser-frame {
+    position: relative;
+  }
+  :global(:root[data-js]) .teaser-img:not(:global(.is-loaded)) {
+    opacity: 0;
+  }
+  :global(:root[data-js]) .teaser-frame:has(.teaser-img:not(:global(.is-loaded)))::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, var(--color-shimmer) 50%, transparent 70%) 0 0 / 250% 100%;
+    animation: shimmer 1.3s linear infinite;
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -150% 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(:root[data-js]) .teaser-frame::before {
+      animation: none;
+    }
+  }
+  .card-link:hover .teaser {
+    transform: scale(1.03);
+  }
+  .card-link:hover .ttl {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+  .venue {
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--color-venue);
+    color: var(--color-on-venue);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .venue.preprint {
+    background: var(--color-preprint);
+  }
+  /* arXiv / Code links (hidden for now, see markup)
+  .card-links a {
+    color: var(--color-muted);
+    text-decoration: none;
+  }
+  .card-links a:hover {
+    color: var(--color-accent);
+  }
+  */
+
+  /* Shares a view-transition name with the modal panel while it opens and closes (transition.ts). */
+  .card.transitioning .card-link {
+    view-transition-name: card-expand;
+  }
+</style>

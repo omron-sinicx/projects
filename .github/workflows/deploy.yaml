@@ -1,0 +1,45 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Actions tab → "Run workflow": rebuild now (e.g. a new project page was published)
+  schedule:
+    - cron: '0 0 * * 1' # weekly: pick up newly published project pages
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Node comes from pixi.lock, the same as local development.
+      - uses: prefix-dev/setup-pixi@v0.11.2
+        with:
+          cache: true
+      - name: Check and build
+        run: pixi run verify
+        env:
+          # Built-in per-run token; only used to raise the GitHub API rate limit for the repo listing.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

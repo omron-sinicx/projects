@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+  }
+  body {
+    margin: 0;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+}
+
+/* Page ↔ page (All / area / theme) uses cross-document View Transitions: the header, tab indicator,
+   area heading (cat-*), theme card ↔ banner (theme-*) and each card (c-*) morph; the rest cross-fades. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+::view-transition-group(*) {
+  animation-duration: var(--duration-expand);
+  animation-timing-function: var(--ease-expand);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.22s;
+}
+
+/* Card ↔ modal panel (same-document, transition.ts sets data-vt). Only the card and the panel take part;
+   the names used for page-to-page morphs would otherwise be captured too and paint over the panel. */
+:root[data-vt] *:not(.card-link, .panel) {
+  view-transition-name: none !important;
+}
+
+/* Card ↔ modal panel. The box morphs; contents cross-fade instead of stretching. */
+::view-transition-old(card-expand),
+::view-transition-new(card-expand) {
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+:root[data-vt='expand']::view-transition-old(card-expand) {
+  animation-duration: 0.2s;
+}
+:root[data-vt='shrink']::view-transition-new(card-expand) {
+  animation-delay: 0.15s;
+  animation-duration: 0.35s;
+  animation-fill-mode: both;
+}
+
+@utility shell {
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}

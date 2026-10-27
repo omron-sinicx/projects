@@ -1,0 +1,114 @@
+---
+import { Font, Image } from 'astro:assets';
+import logo from '../assets/sinicx-logo.png';
+import logoFooter from '../assets/sinicx-logo-footer.png';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'SINIC X Research Projects',
+  description = 'Project pages of OMRON SINIC X research.',
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+// Generated at build time by src/pages/og.png.ts.
+const ogImage = new URL(`${import.meta.env.BASE_URL}og.png`, Astro.site);
+const base = import.meta.env.BASE_URL;
+const speculationRules = {
+  prerender: [{ where: { href_matches: `${base}*` }, eagerness: 'moderate' }],
+};
+
+const links = [
+  { label: 'Activity', href: 'https://www.omron.com/sinicx/en/activity/' },
+  {
+    label: 'Publications',
+    href: 'https://www.omron.com/global/en/technology/publications/?affiliation=%5B%22OSX%22%5D',
+  },
+  { label: 'Official site', href: 'https://www.omron.com/sinicx/en/' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="OMRON SINIC X" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="OMRON SINIC X Research Projects" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@omron_sinicx" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <Font cssVariable="--font-inter" preload={[{ weight: 400 }, { weight: 600 }]} />
+    <Font cssVariable="--font-krona" />
+    <!-- Lets CSS hide teasers until images.ts marks them loaded; without JS they show as usual. -->
+    <script is:inline>document.documentElement.dataset.js = '';</script>
+    <!-- Prerender this site's own pages on hover so page-to-page transitions start instantly. -->
+    <script type="speculationrules" set:html={JSON.stringify(speculationRules)} />
+    <slot name="head" />
+  </head>
+  <body class="flex min-h-dvh flex-col">
+    <header class="border-b border-border" style="view-transition-name: site-header">
+      <div class="shell flex min-h-16 items-center justify-center gap-x-6 sm:min-h-[76px] sm:justify-between">
+        <span class="hidden flex-1 sm:block"></span>
+        <a href={base} aria-label="SINIC X — Research projects home" class="inline-flex p-2.5">
+          <Image src={logo} alt="SINIC X" height={20} class="h-5 w-auto" loading="eager" />
+        </a>
+        <nav aria-label="SINIC X" class="hidden flex-1 flex-wrap justify-end gap-x-5 gap-y-1 sm:flex">
+          {
+            links.map((l) => (
+              <a
+                href={l.href}
+                target="_blank"
+                rel="noopener"
+                class="inline-flex min-h-11 items-center gap-1 text-[13px] font-medium text-fg no-underline hover:text-accent"
+              >
+                {l.label}
+                <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9" /></svg>
+                <span class="sr-only">(opens in a new tab)</span>
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="mt-30 bg-footer text-on-footer">
+      <div class="shell flex flex-col items-center gap-3.5 pt-10 pb-11">
+        <Image src={logoFooter} alt="SINIC X" height={36} class="h-9 w-auto" />
+        <nav aria-label="Footer" class="flex flex-wrap justify-center gap-x-5 text-xs">
+          {
+            links.map((l) => (
+              <a href={l.href} target="_blank" rel="noopener" class="inline-flex min-h-11 items-center text-on-footer no-underline hover:underline">
+                {l.label}
+              </a>
+            ))
+          }
+        </nav>
+        <span class="text-xs text-on-footer-muted">© OMRON SINIC X Corporation, all rights reserved.</span>
+      </div>
+    </footer>
+    <script>
+      import '../scripts/images';
+    </script>
+  </body>
+</html>

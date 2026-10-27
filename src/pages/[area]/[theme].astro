@@ -1,0 +1,54 @@
+---
+import xmark from '../../assets/sinicx-xmark.png';
+import Base from '../../layouts/Base.astro';
+import AreaTabs from '../../components/AreaTabs.astro';
+import ProjectGrid from '../../components/ProjectGrid.astro';
+import ProjectModal from '../../components/ProjectModal.astro';
+import { CATEGORIES, THEMES, categoryHref } from '../../lib/categories';
+import { areas, getProjects } from '../../lib/projects';
+
+export function getStaticPaths() {
+  return THEMES.map((theme) => {
+    const category = CATEGORIES.find((c) => c.id === theme.category)!;
+    return { params: { area: category.slug, theme: theme.id }, props: { theme, category } };
+  });
+}
+
+const { theme, category } = Astro.props;
+const all = await getProjects();
+const { counts } = areas(all);
+const projects = all.filter((p) => p.data.themes.includes(theme.id));
+---
+
+<Base title={`${theme.name} — SINIC X Research Projects`} description={theme.description}>
+  <AreaTabs active={category.id} counts={counts} />
+  <section class="shell pt-7 pb-6">
+    <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1 text-[13px] font-semibold">
+      <a href={import.meta.env.BASE_URL} class="inline-flex min-h-11 items-center gap-1.5 px-1 text-fg no-underline hover:text-accent">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>
+        All
+      </a>
+      <span aria-hidden="true" class="text-muted">/</span>
+      <a href={categoryHref(category)} class="inline-flex min-h-11 items-center px-1.5 text-fg no-underline hover:text-accent">{category.name}</a>
+    </nav>
+
+    <header
+      class="relative mt-5 mb-9 flex min-h-[180px] flex-col justify-end gap-2.5 overflow-hidden rounded-hero bg-theme-bg px-6 pt-10 pb-9 text-on-theme sm:px-10"
+      style={`view-transition-name: theme-${theme.id}`}
+    >
+      <img class="absolute top-1/2 right-6 h-20 w-auto -translate-y-1/2 sm:right-12 sm:h-[120px]" src={xmark.src} alt="" width={xmark.width} height={xmark.height} />
+      <span class="relative text-[11px] font-semibold tracking-[.12em] text-on-theme-muted">THEME · {category.name}</span>
+      <h1 class="relative m-0 font-display text-[clamp(28px,5vw,44px)] leading-[1.05] font-normal">{theme.name}</h1>
+      <p class="relative m-0 max-w-[60ch] text-sm text-on-theme-muted">{theme.description}</p>
+      <span class="relative text-sm text-on-theme-muted">{projects.length} projects</span>
+    </header>
+
+    <ProjectGrid projects={projects} scope={theme.id} />
+  </section>
+  <ProjectModal />
+</Base>
+
+<script>
+  import '../../scripts/transition';
+  import '../../scripts/progressive';
+</script>

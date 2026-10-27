@@ -1,0 +1,51 @@
+# The only hand-maintained data in this repo.
+
+# Repos that have Pages enabled but are not project pages.
+hidden: []
+
+# Shown first, in this order.
+pinned:
+  - clap
+
+# Optional manual title fixes: <repo>: "Title"
+titles:
+  # Built with a development bundle: no OG tags and no extractable template metadata.
+  safe-rover-navi: "Risk-aware Path Planning via Probabilistic Fusion of Traversability Prediction for Planetary Rovers on Heterogeneous Terrains"
+
+# Short name on the card (default: the title before ":" or the repo name).
+names:
+  tameso: TaMeSo-bot
+  saguri-bot-page: Saguri-bot
+
+# Card image, when the page's own teaser is wrong.
+images:
+  # OG image is a stale copy of mabr's teaser; the page itself shows this figure.
+  soft-robot-sim-to-real: https://omron-sinicx.github.io/soft-robot-sim-to-real/assets/proposed_rev1.png
+
+# Venue label. Read from the page's template.yaml (`conference:`); set here to fix or fill it in.
+# No venue → a gray "Preprint" label (also shown for a value like "Preprint" or "arXiv 2026").
+venues:
+  DIPCOM: "SII 2026"
+  safe-rover-navi: "ICRA2023"
+  paper2layout: "CVPR 2026 Findings"
+  SBSFiguresPage: "AAAI 2025 WS"
+  lcqp: "IROS 2022"
+
+# Research area(s): one id or a list of pai | sci | hci. Guessed from venue/keywords; set here to fix it.
+categories:
+  maru: pai # CHI venue, but the contribution is the robot itself
+  paper2layout: sci # SciPostGen: paper → poster layouts
+  SBSFiguresPage: sci # synthesized figure QA for scientific figures
+  audio_visual_self_supervision: pai # no keyword match; table-tennis video/audio
+  plasma: pai # no keyword match; GPU vector search, parked here for now
+  point-hand: hci # user study of novice operators
+
+# Theme(s) inside the project's areas: one id or a list of hardware | soft-robotics | planning |
+# foundation-models, or [] for none. Guessed from title/description; set here to replace the guess.
+themes:
+  maru: hardware
+  CompACT: [] # compliance *control* learning, not soft robotics
+  mabr: planning # multi-robot coordination
+  Online_Robot_Error_Detection: foundation-models # VLM-based failure detection/description
+  DIPCOM: [] # compliance *control* learning (like CompACT), not soft robotics
+  compliance-enabled-failure-recovery: [soft-robotics, foundation-models] # soft wrist + VLM-guided recovery

@@ -1,0 +1,170 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { categoryHref, type Category, type Theme } from '../lib/categories';
+import ProjectCard from './ProjectCard.astro';
+import ThemeCard from './ThemeCard.astro';
+
+interface Props {
+  category: Category;
+  no: number;
+  count: number;
+  themes: { theme: Theme; count: number; previews?: string[] }[];
+  projects: CollectionEntry<'projects'>[];
+}
+
+// Six columns of the area's newest work after the theme tiles; the rest is one click away on the area page.
+const RAIL_LIMIT = 12;
+
+const { category, no, count, themes, projects } = Astro.props;
+const shown = projects.slice(0, RAIL_LIMIT);
+const more = projects.length - shown.length;
+// A short area reads better as one row than as a half-filled two-row block.
+const rows = themes.length * 2 + shown.length > 5 ? 2 : 1;
+const titleId = `area-${category.id}-title`;
+---
+
+<section class="@container mx-auto max-w-(--page-max) pt-12 pb-2" aria-labelledby={titleId} data-rail>
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-4 px-(--gutter)">
+    <div class="flex items-start gap-2" style={`view-transition-name: cat-${category.id}`}>
+      <span aria-hidden="true" class="font-display text-[13px] leading-none text-accent">{no}</span>
+      <h2 id={titleId} class="m-0 font-display text-[22px] leading-none font-normal">{category.title}</h2>
+      <span class="ml-1.5 text-xs leading-[22px] text-muted">{count}</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href={categoryHref(category)} class="inline-flex min-h-11 items-center gap-1.5 px-3.5 text-[13px] font-semibold text-fg no-underline hover:text-accent">
+        View all
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        <span class="sr-only">{category.name} projects</span>
+      </a>
+      <!-- Shown by rail.ts; without JS the rail still scrolls natively. -->
+      <button type="button" class="arrow" data-dir="-1" aria-label={`Scroll ${category.name} left`} hidden>
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+      </button>
+      <button type="button" class="arrow" data-dir="1" aria-label={`Scroll ${category.name} right`} hidden>
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+      </button>
+    </div>
+  </div>
+
+  <ul class="rail list-none" style={`--rows: ${rows}`}>
+    {
+      themes.map((t) => (
+        <li class="theme">
+          <ThemeCard {...t} />
+        </li>
+      ))
+    }
+    {
+      shown.map((project) => (
+        <li>
+          <ProjectCard project={project} scope={category.id} />
+        </li>
+      ))
+    }
+    {
+      more > 0 && (
+        <li class="more">
+          <a href={categoryHref(category)} class="more-link">
+            <span class="font-display text-[28px] leading-none">+{more}</span>
+            <span class="inline-flex items-center gap-1.5 text-[13px] font-semibold">
+              View all {count}
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </span>
+          </a>
+        </li>
+      )
+    }
+  </ul>
+</section>
+
+<style>
+  /* Two rows that grow sideways; whatever does not fit the first screen scrolls into view. */
+  .rail {
+    display: grid;
+    grid-auto-flow: column dense;
+    grid-template-rows: repeat(var(--rows), auto);
+    grid-auto-columns: var(--card-min);
+    gap: 32px 20px;
+    margin: 0;
+    padding: 0 var(--gutter) 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+  .rail > li {
+    scroll-snap-align: start;
+  }
+  /* Cards slide in as the rail scrolls sideways. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .rail > li {
+        animation: slide-in linear both;
+        animation-timeline: view(inline);
+        animation-range: entry 0% entry 80%;
+      }
+    }
+  }
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(32px);
+    }
+  }
+  /* Theme tiles are two cards wide and one row tall, so a pair stacks in the first columns and the newest
+     projects stay visible beside them. On phones they shrink to one column. */
+  .theme {
+    grid-column: span 2;
+  }
+  @container (max-width: 560px) {
+    .theme {
+      grid-column: span 1;
+    }
+  }
+  .more {
+    grid-row: span var(--rows);
+  }
+  .more-link {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    color: var(--color-fg);
+    text-decoration: none;
+  }
+  .more-link:hover {
+    border-color: var(--color-fg);
+    color: var(--color-accent);
+  }
+  .arrow {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    cursor: pointer;
+  }
+  .arrow[hidden] {
+    display: none;
+  }
+  .arrow:hover:not(:disabled) {
+    background: var(--color-fg);
+    color: var(--color-bg);
+  }
+  .arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+</style>

@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import AreaTabs from '../components/AreaTabs.astro';
+import Rail from '../components/Rail.astro';
+import ProjectModal from '../components/ProjectModal.astro';
+import { areas, getProjects } from '../lib/projects';
+
+const { sections, counts } = areas(await getProjects());
+---
+
+<Base>
+  <h1 class="sr-only">SINIC X research projects</h1>
+  <AreaTabs active="all" counts={counts} />
+  <div class="pb-6">
+    {/* After the theme tiles, the newest projects of the whole area (themed or not). */}
+    {sections.map((s) => <Rail {...s} projects={s.all} />)}
+  </div>
+  <ProjectModal />
+</Base>
+
+<script>
+  import '../scripts/transition';
+  import '../scripts/rail';
+</script>

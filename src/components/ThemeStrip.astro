@@ -1,0 +1,27 @@
+---
+import type { Theme } from '../lib/categories';
+import ThemeCard from './ThemeCard.astro';
+
+interface Props {
+  themes: { theme: Theme; count: number; previews?: string[] }[];
+}
+
+const { themes } = Astro.props;
+---
+
+<!-- All of an area's themes on one row (wrapping only when the screen is too narrow). -->
+<ul class="strip grid list-none gap-5 p-0">
+  {
+    themes.map((t) => (
+      <li>
+        <ThemeCard {...t} />
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .strip {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+</style>

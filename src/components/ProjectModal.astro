@@ -1,0 +1,124 @@
+---
+// Shell for viewing a project page in place. transition.ts fills it in and inserts the iframe on open.
+---
+
+<dialog class="project-modal" aria-labelledby="project-modal-title">
+  <div class="panel">
+    <header class="bar flex items-center gap-3 border-b border-border bg-bg pr-1.5 pl-4 text-fg">
+      <span id="project-modal-title" class="min-w-0 flex-1 truncate text-sm font-bold"></span>
+      <a
+        class="open-page inline-flex min-h-11 items-center gap-1 px-2 text-[13px] font-medium text-fg no-underline hover:text-accent"
+        href=""
+        target="_blank"
+        rel="noopener"
+      >
+        Open page
+        <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9" /></svg>
+        <span class="sr-only">(opens in a new tab)</span>
+      </a>
+      <button
+        type="button"
+        autofocus
+        class="close inline-flex size-11 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-fg hover:text-accent"
+        aria-label="Close"
+      >
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
+    </header>
+    <div class="frame relative flex-1">
+      <div class="loading absolute inset-0 grid place-items-center" role="status">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="sr-only">Loading…</span>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .project-modal {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+  .project-modal::backdrop {
+    background: var(--color-backdrop);
+  }
+  .panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--color-expand);
+  }
+  .project-modal[open] .panel {
+    view-transition-name: card-expand;
+  }
+  .bar {
+    flex: none;
+    min-height: 52px;
+  }
+  .frame :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: var(--color-expand);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .frame :global(iframe.loaded) {
+    opacity: 1;
+  }
+  .frame:has(:global(iframe.loaded)) .loading {
+    display: none;
+  }
+  /* Appear only after the card → panel morph, so the spinner is not in the snapshot being scaled. */
+  .loading {
+    animation: appear 0.2s 0.5s both;
+  }
+  @keyframes appear {
+    from {
+      opacity: 0;
+    }
+  }
+  /* Simple spinner: an accent arc that fades out along its tail, turning. */
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 10%, var(--color-accent));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+    animation: spin 0.75s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation-duration: 2s;
+    }
+  }
+
+  /* Page shell breakpoint: inset panel on wider screens, full-screen on phones. */
+  @media (min-width: 640px) {
+    .panel {
+      inset-block: var(--modal-margin);
+      inset-inline: max(var(--modal-margin), (100% - var(--modal-width)) / 2);
+      border-radius: var(--radius-modal);
+    }
+  }
+
+  :global(html:has(.project-modal[open])) {
+    overflow: hidden;
+  }
+</style>

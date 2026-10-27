@@ -1,0 +1,53 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ProjectCard from './ProjectCard.astro';
+
+interface Props {
+  projects: CollectionEntry<'projects'>[];
+  /** Section the cards are listed under; keeps view-transition names unique per page. */
+  scope: string;
+}
+
+const { projects, scope } = Astro.props;
+---
+
+<div class="@container">
+  <!-- All cards are in the HTML (works without JS); progressive.ts reveals them in batches on scroll. -->
+  <ul class="grid list-none gap-x-5 gap-y-9 p-0" data-progressive>
+    {
+      projects.map((project) => (
+        <li>
+          <ProjectCard project={project} scope={scope} />
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  ul {
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-min), 1fr));
+  }
+  /* Cards rise in as they scroll into view (scroll-driven, no JS). Where scroll-driven animations are
+     unsupported, cards revealed by progressive.ts get a one-off fade instead. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      li {
+        animation: reveal linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 70%;
+      }
+    }
+    @supports not (animation-timeline: view()) {
+      li:global(.revealed) {
+        animation: reveal 0.45s var(--ease-expand) both;
+      }
+    }
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+  }
+</style>

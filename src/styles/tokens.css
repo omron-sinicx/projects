@@ -1,0 +1,77 @@
+/*
+ * Design tokens — the only place colors, radii, spacing and fonts are defined.
+ * Values follow the original Claude Design mock of this site.
+ * @theme values become Tailwind utilities (bg-bg, text-muted, rounded-card, font-display, …).
+ * Light only: project pages are white, so this index stays white regardless of the OS setting.
+ */
+@theme {
+  /* Surfaces */
+  --color-bg: #ffffff;
+  --color-thumb: #e0e0e0;
+  --color-thumb-mark: #ffffff;
+  /* Theme cards and banners are black with the white X mark. */
+  --color-theme-bg: #000000;
+  --color-on-theme: #ffffff;
+  --color-on-theme-muted: #c9c9c9;
+  /* Teaser images are often transparent PNGs drawn for a white page. */
+  --color-teaser: #ffffff;
+  /* Highlight sweeping across an image frame while it loads. */
+  --color-shimmer: rgb(255 255 255 / 0.6);
+  --color-backdrop: rgb(0 0 0 / 0.55);
+
+  /* Text */
+  --color-fg: #000000;
+  --color-body: #4a4a4a;
+  --color-muted: #5c5c5c;
+
+  /* Lines */
+  --color-border: #e0e0e0;
+
+  /* Accent */
+  --color-accent: #e55927;
+  /* Venue label: the accent darkened just enough for white 11px text to pass WCAG AA (4.7:1). */
+  --color-venue: #c94a1a;
+  --color-on-venue: #ffffff;
+  /* "Preprint" label for work without a known venue (white text 6.7:1). */
+  --color-preprint: #5c5c5c;
+
+  /* Footer artwork is white-on-black. */
+  --color-footer: #000000;
+  --color-on-footer: #ffffff;
+  --color-on-footer-muted: #c9c9c9;
+
+  /* Behind the iframe while a project page loads (project pages are white). */
+  --color-expand: #ffffff;
+
+  /* Shape */
+  --radius-card: 10px;
+  --radius-hero: 12px;
+  --radius-modal: 12px;
+
+  /* Type */
+  --font-sans: var(--font-inter), -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  --font-display: var(--font-krona), var(--font-sans);
+  --text-meta: 11px;
+  --text-card-title: 14px;
+  --text-card-desc: 13px;
+
+  /* Motion */
+  --ease-expand: cubic-bezier(0.2, 0.75, 0.15, 1);
+}
+
+:root {
+  color-scheme: light;
+
+  /* Layout */
+  --page-max: 1312px;
+  --gutter: 24px;
+  --card-min: 232px;
+  /* Project pages cap their text column at 900px; 900 / 0.6 keeps that column at ~60% of the modal. */
+  --modal-width: 1500px;
+  --modal-margin: 24px;
+
+  --duration-expand: 0.5s;
+
+  /* The no-image placeholder inverts the black logo PNG to a white X on gray. */
+  --xmark-filter: invert(1);
+}

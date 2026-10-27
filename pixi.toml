@@ -1,0 +1,45 @@
+[workspace]
+channels = ["conda-forge"]
+name = "projects"
+platforms = ["linux-64", "osx-arm64", "linux-aarch64", "win-64"]
+version = "0.1.0"
+
+[dependencies]
+# Node is pinned here (and resolved exactly in pixi.lock); npm packages stay in package-lock.json.
+nodejs = "==24.21.0"
+
+# All npm commands go through these tasks so they run on the pinned Node.
+# Extra arguments are passed through, e.g. `pixi run dev --host 0.0.0.0`.
+[tasks.install]
+description = "Install npm packages (skipped while package-lock.json is unchanged)"
+cmd = "npm ci"
+inputs = ["package.json", "package-lock.json"]
+outputs = ["node_modules/.package-lock.json"]
+
+[tasks.dev]
+description = "Dev server at http://localhost:4321/projects/"
+cmd = "npx astro dev"
+depends-on = ["install"]
+
+[tasks.build]
+description = "Static build into dist/"
+cmd = "npx astro build"
+depends-on = ["install"]
+
+[tasks.preview]
+description = "Serve dist/ locally"
+cmd = "npx astro preview"
+depends-on = ["install"]
+
+[tasks.check]
+description = "Type-check (astro check)"
+cmd = "npx astro check"
+depends-on = ["install"]
+
+[tasks.verify]
+description = "What must pass before finishing a task: check, then build"
+depends-on = ["check", "build"]
+
+[tasks.refresh]
+description = "Drop the 1-hour dev cache of the project list so the next dev/build refetches it"
+cmd = "rm -f node_modules/.cache/research-projects.json"

@@ -1,0 +1,54 @@
+---
+import xmark from '../assets/sinicx-xmark.png';
+import { themeHref, type Theme } from '../lib/categories';
+
+interface Props {
+  theme: Theme;
+  count: number;
+  /** Member teasers shown as a strip; the tile works without them. */
+  previews?: string[];
+}
+
+const { theme, count, previews = [] } = Astro.props;
+---
+
+<a
+  class="theme-card @container flex h-full min-h-[220px] flex-col gap-3 overflow-hidden rounded-hero bg-theme-bg p-5 text-on-theme no-underline"
+  href={themeHref(theme)}
+  style={`view-transition-name: theme-${theme.id}`}
+>
+  <div class="flex items-start justify-between gap-4">
+    <span class="pt-0.5 text-[11px] font-semibold tracking-[.12em] text-on-theme-muted">THEME · {count} projects</span>
+    <img class="mark h-8 w-auto" src={xmark.src} alt="" width={xmark.width} height={xmark.height} loading="lazy" decoding="async" />
+  </div>
+  <div class="mt-auto flex flex-col gap-1.5">
+    <span class="ttl font-display text-[clamp(20px,4.5cqi,26px)] leading-[1.1]">{theme.name}</span>
+    <span class="line-clamp-2 max-w-[56ch] text-[13px] leading-relaxed text-on-theme-muted">{theme.description}</span>
+  </div>
+  {
+    previews.length > 0 && (
+      <ul class="hidden list-none grid-cols-2 gap-2 p-0 @[15rem]:grid @[26rem]:grid-cols-4" aria-hidden="true">
+        {previews.slice(0, 4).map((src, i) => (
+          <li class:list={['overflow-hidden rounded-md bg-teaser', i >= 2 && 'hidden @[26rem]:block']}>
+            <img class="aspect-[2/1] w-full object-cover" src={src} alt="" loading="lazy" decoding="async" />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</a>
+
+<style>
+  .mark {
+    transition: transform 0.35s var(--ease-expand);
+  }
+  .theme-card:hover .mark {
+    transform: scale(1.08);
+  }
+  .theme-card:hover .ttl {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+</style>
